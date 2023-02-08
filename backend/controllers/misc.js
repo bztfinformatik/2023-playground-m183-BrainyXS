@@ -1,4 +1,4 @@
-const { HTTP_STATUS_OK } = require("../util/const");
+const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = require("../util/const");
 
 exports.getHelloWorld = (req, res, next) => {
   res.status(200).json({
@@ -14,7 +14,7 @@ exports.postMessage = (req, res, next) => {
   const header = req.body.header;
   const content = req.body.content;
 
-  res.status(201).json({
+  res.status(HTTP_STATUS_CREATED).json({
     statusmessage: "Message posted successfully",
     post: { id: new Date().toISOString(), header: header, content: content },
   });
