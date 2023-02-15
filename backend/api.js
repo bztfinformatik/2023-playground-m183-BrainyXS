@@ -3,6 +3,7 @@
 //
 
 //load environment
+
 require("dotenv").config();
 // module for handling http requests and responses and managing routes
 const express = require("express");
@@ -12,6 +13,10 @@ const path = require("path");
 const routes = require("./routes/main");
 // get constants
 const { STATIC_DIR } = require("./util/const");
+
+const {User, Comment, Vote} = require("./models/main");
+
+
 
 
 
