@@ -1,4 +1,4 @@
-const { Sequelize, Model, DataTypes } = require('sequelize');
+const {Sequelize, Model, DataTypes} = require('sequelize');
 
 const sequelize = new Sequelize(
     'm153',
@@ -36,8 +36,16 @@ Comment.hasOne(Comment, {
         name: "ParentCommentId"
     }
 });
+sequelize.sync({force: true})
+    .then(() => {
+        User.create({
+            username: 'john_doe',
+            passwordHash: 'somepassword',
+            email: 'john_doe@example.com',
+            profileImageUrl: 'https://example.com/profile.jpg'
+        }).then(u => console.log(u.toJSON()));
 
-sequelize.sync({force: true});
+    });
 
 module.exports = {
     User: User,
