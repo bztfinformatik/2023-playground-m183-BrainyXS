@@ -1,54 +1,81 @@
-const {Sequelize, Model, DataTypes} = require('sequelize');
+const { Model, DataTypes } = require("sequelize");
+const db = require("../util/db");
 
-const sequelize = new Sequelize(
-    'm153',
-    'root',
-    'root',
+class User extends Model {}
+User.init(
     {
-        host: 'localhost',
-        dialect: 'mysql'
-    }
+        firstname: {
+            type: DataTypes.STRING,
+        },
+        lastname: {
+            type: DataTypes.STRING,
+        },
+        username: {
+            type: DataTypes.STRING,
+            unique: true,
+            allowNull: false,
+        },
+        pwd: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        avatar: {
+            type: DataTypes.STRING,
+            get() {
+                return `${process.env.NODE_HOST}/${this.getDataValue("avatar")}`;
+            },
+        },
+    },
+    { sequelize: db, modelName: "user", freezeTableName: true }
 );
-const User = sequelize.define('User', {
-    username: DataTypes.STRING,
-    passwordHash: DataTypes.STRING,
-    email: DataTypes.STRING,
-    profileImageUrl: DataTypes.STRING
+
+class Posting extends Model {}
+Posting.init(
+    {
+        title: {
+            type: DataTypes.STRING,
+        },
+        content: {
+            type: DataTypes.STRING(4096),
+        },
+        timestamp: {
+            type: DataTypes.DATE,
+            allowNull: false,
+        },
+    },
+    { sequelize: db, modelName: "posting", freezeTableName: true }
+);
+
+class Vote extends Model {}
+Vote.init(
+    {
+        isupvote: {
+            type: DataTypes.BOOLEAN,
+        },
+    },
+    { sequelize: db, modelName: "vote", freezeTableName: true }
+);
+
+// define model associations
+User.hasMany(Posting, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    foreignKey: "authorId",
 });
 
-const Comment = sequelize.define('Comment', {
-    text: DataTypes.STRING,
-});
+Posting.belongsTo(User, { foreignKey: "authorId" });
 
-const Vote = sequelize.define('Vote', {
-    isUpvote: DataTypes.BOOLEAN,
-});
+User.belongsToMany(Posting, { through: "vote" });
+Posting.belongsToMany(User, { through: "vote" });
 
-User.hasMany(Comment);
-User.hasMany(Vote);
-Comment.belongsTo(User);
-Comment.hasMany(Vote);
-Vote.belongsTo(Comment);
-Vote.belongsTo(User);
-Comment.hasOne(Comment, {
-    foreignKey: {
-        allowNull: true,
-        name: "ParentCommentId"
-    }
+Posting.hasMany(Posting, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    foreignKey: "parentId",
 });
-sequelize.sync({force: true})
-    .then(() => {
-        User.create({
-            username: 'john_doe',
-            passwordHash: 'somepassword',
-            email: 'john_doe@example.com',
-            profileImageUrl: 'https://example.com/profile.jpg'
-        }).then(u => console.log(u.toJSON()));
-
-    });
 
 module.exports = {
-    User: User,
-    Comment: Comment,
-    Vote: Vote
-}
+    User,
+    Posting,
+    Vote,
+};

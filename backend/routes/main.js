@@ -10,6 +10,7 @@ const router = express.Router();
 router.get('/hw', miscCtrl.getHelloWorld);
 router.post('/pm', miscCtrl.postMessage);
 router.get("/", miscCtrl.default);
+router.post("/users", miscCtrl.postUser);
 
 
 module.exports = router;
